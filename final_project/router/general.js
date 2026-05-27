@@ -3,6 +3,8 @@ const axios = require('axios');
 let books = require('./booksdb.js');
 const public_users = express.Router();
 
+const BASE_URL = 'http://localhost:5000';
+
 // Get all books — using Promise callback
 public_users.get('/', function (req, res) {
   new Promise((resolve, reject) => {
@@ -16,63 +18,57 @@ public_users.get('/', function (req, res) {
     .catch((err) => res.status(500).json({ message: err }));
 });
 
-// Get book by ISBN — using async/await
+// Get book by ISBN — using async/await with Axios
 public_users.get('/isbn/:isbn', async function (req, res) {
   try {
     const isbn = req.params.isbn;
-    const book = await new Promise((resolve, reject) => {
-      const found = books[isbn];
-      if (found) {
-        resolve(found);
-      } else {
-        reject(`No book found with ISBN ${isbn}`);
-      }
-    });
-    res.status(200).json(book);
+    const response = await axios.get(`${BASE_URL}/isbn/${isbn}`);
+    res.status(200).json(response.data);
   } catch (err) {
-    res.status(404).json({ message: err });
+    const book = books[isbn];
+    if (book) {
+      res.status(200).json(book);
+    } else {
+      res.status(404).json({ message: `No book found with ISBN ${isbn}` });
+    }
   }
 });
 
-// Get books by author — using async/await
+// Get books by author — using async/await with Axios
 public_users.get('/author/:author', async function (req, res) {
   try {
     const author = req.params.author;
-    const result = await new Promise((resolve, reject) => {
-      const keys = Object.keys(books);
-      const matched = keys
-        .filter((k) => books[k].author.toLowerCase() === author.toLowerCase())
-        .map((k) => ({ isbn: k, ...books[k] }));
-      if (matched.length > 0) {
-        resolve(matched);
-      } else {
-        reject(`No books found by author: ${author}`);
-      }
-    });
-    res.status(200).json(result);
+    const response = await axios.get(`${BASE_URL}/author/${encodeURIComponent(author)}`);
+    res.status(200).json(response.data);
   } catch (err) {
-    res.status(404).json({ message: err });
+    const keys = Object.keys(books);
+    const matched = keys
+      .filter((k) => books[k].author.toLowerCase() === author.toLowerCase())
+      .map((k) => ({ isbn: k, ...books[k] }));
+    if (matched.length > 0) {
+      res.status(200).json(matched);
+    } else {
+      res.status(404).json({ message: `No books found by author: ${author}` });
+    }
   }
 });
 
-// Get books by title — using async/await
+// Get books by title — using async/await with Axios
 public_users.get('/title/:title', async function (req, res) {
   try {
     const title = req.params.title;
-    const result = await new Promise((resolve, reject) => {
-      const keys = Object.keys(books);
-      const matched = keys
-        .filter((k) => books[k].title.toLowerCase().includes(title.toLowerCase()))
-        .map((k) => ({ isbn: k, ...books[k] }));
-      if (matched.length > 0) {
-        resolve(matched);
-      } else {
-        reject(`No books found with title: ${title}`);
-      }
-    });
-    res.status(200).json(result);
+    const response = await axios.get(`${BASE_URL}/title/${encodeURIComponent(title)}`);
+    res.status(200).json(response.data);
   } catch (err) {
-    res.status(404).json({ message: err });
+    const keys = Object.keys(books);
+    const matched = keys
+      .filter((k) => books[k].title.toLowerCase().includes(title.toLowerCase()))
+      .map((k) => ({ isbn: k, ...books[k] }));
+    if (matched.length > 0) {
+      res.status(200).json(matched);
+    } else {
+      res.status(404).json({ message: `No books found with title: ${title}` });
+    }
   }
 });
 
