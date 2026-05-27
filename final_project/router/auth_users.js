@@ -28,7 +28,7 @@ regd_users.post('/login', (req, res) => {
   const accessToken = jwt.sign({ data: username }, 'access', { expiresIn: '1h' });
   req.session.authorization = { accessToken, username };
 
-  return res.status(200).json({ message: 'User successfully logged in', token: accessToken });
+  return res.status(200).json({ message: 'Login successful!', token: accessToken });
 });
 
 // Add or modify a book review
