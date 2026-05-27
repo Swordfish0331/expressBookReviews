@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
-const { authenticated, isValid, users } = require('./auth_users.js');
-const { general } = require('./general.js');
+const { authenticated, isValid, users } = require('./router/auth_users.js');
+const { general } = require('./router/general.js');
 
 const app = express();
 app.use(express.json());
